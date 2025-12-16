@@ -1,3 +1,5 @@
+// 실행명령어 => npm run start:dev
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
