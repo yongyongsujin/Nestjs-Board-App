@@ -4,11 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Board } from './board.entity';
 import { BoardsService } from './boards.service';
 import { BoardsController } from './boards.controller';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     // TypeOrmModule.forFeature([BoardRepository])
-    TypeOrmModule.forFeature([Board]) // -> Board만 등록
+    TypeOrmModule.forFeature([Board]), // -> Board만 등록
+    AuthModule, // -> @UseGuards(AuthGuard()) 사용위해 AuthModule 추가
   ],
   controllers: [BoardsController],
   providers: [BoardsService]

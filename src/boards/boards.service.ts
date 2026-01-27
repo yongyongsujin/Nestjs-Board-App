@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Board } from './board.entity';
 import { CreateBoardDto } from './dto/create_board.dto';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class BoardsService {
@@ -20,8 +21,16 @@ export class BoardsService {
     // getAllBoards() : Board[] {
     //     return this.boards;
     // }
-    async getAllBoards(): Promise<Board[]> {
-        return this.boardRepository.find();
+    // 모든 게시물 가져오기
+    // async getAllBoards(): Promise<Board[]> {
+    //     return this.boardRepository.find();
+    // }
+    // 특정 유저의 모든 게시물 가져오기
+    async getAllBoards(user: User): Promise<Board[]> {
+        const query = this.boardRepository.createQueryBuilder('board');
+        query.where('board.userId = :userId', { userId: user.id });
+        const boards = await query.getMany();
+        return boards;
     }
 
     // createBoard(title: string, description: string) : Board {
@@ -35,12 +44,13 @@ export class BoardsService {
     //     this.boards.push(board);
     //     return board;
     // }
-    async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+    async createBoard(createBoardDto: CreateBoardDto, user: User): Promise<Board> {
         const { title, description } = createBoardDto;
         const board = this.boardRepository.create({
             title,
             description,
-            status: BoardStatus.PUBLIC
+            status: BoardStatus.PUBLIC,
+            user,
         });
         await this.boardRepository.save(board);
         return board;
@@ -69,8 +79,8 @@ export class BoardsService {
     //     const found = this.getBoardById(id);
     //     this.boards = this.boards.filter(board => board.id !== found.id);
     // }
-    async deleteBoard(id: number): Promise<void> {
-        const result = await this.boardRepository.delete(id);
+    async deleteBoard(id: number, user: User): Promise<void> {
+        const result = await this.boardRepository.delete({id, user});
         // console.log('result: ', result);
         // - result:  DeleteResult { raw: [], affected: 0 } or result:  DeleteResult { raw: [], affected: 1 }
         if (result.affected === 0) {
