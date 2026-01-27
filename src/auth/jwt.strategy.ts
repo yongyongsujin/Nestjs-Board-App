@@ -10,6 +10,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 
+// config/default.yml 파일로부터 시크릿 키와 만료 시간 불러오기
+import config from 'config';
+const jwtConfig = config.get('jwt');
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -17,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private userRepository: Repository<User>,
   ) {
     super({
-      secretOrKey: 'topSecret27', // 토큰 유효성 검증용 시크릿 키 (auth 모듈과 동일한 값이어야 함)
+      secretOrKey: process.env.JWT_SECRET || jwtConfig.secret, // 토큰 유효성 검증용 시크릿 키 (auth 모듈과 동일한 값이어야 함)
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // 요청 헤더의 Bearer 토큰에서 JWT 추출
     });
   }
