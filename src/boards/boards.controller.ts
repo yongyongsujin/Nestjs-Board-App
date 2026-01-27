@@ -10,10 +10,13 @@ import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
+import { Logger } from '@nestjs/common/services/logger.service';
 
 @Controller('boards')
 @UseGuards(AuthGuard())
 export class BoardsController {
+    // logger 객체 생성 후 핸들러들에서 사용 가능
+    private logger = new Logger('BoardsController');
     constructor(private boardsService: BoardsService) {}
 
     // @Get('/')
@@ -24,6 +27,7 @@ export class BoardsController {
     getAllBoard(
         @GetUser() user: User
     ) : Promise<Board[]> {
+        this.logger.verbose(`User "${user.username}" retrieving all boards`);
         return this.boardsService.getAllBoards(user);
     }
 
@@ -40,6 +44,8 @@ export class BoardsController {
     createBoard( 
         @Body() createBoardDto: CreateBoardDto, 
         @GetUser() user: User ) : Promise<Board> {
+            // stringify 를 안하면 [Object object] 형태로 출력됨
+            this.logger.verbose(`User "${user.username}" creating a new board. Payload: ${JSON.stringify(createBoardDto)}`);
         return this.boardsService.createBoard(createBoardDto, user);
     }
 
